@@ -63,14 +63,8 @@ Copy code
 Start the app:
 npm run dev
 
-r
-Copy code
-
 Open in browser:
 btp-ops-copilot-x7px.vercel.app
-
-yaml
-Copy code
 
 ---
 
@@ -101,4 +95,5 @@ Remove secrets and PII before using logs.
 
 ## Author
 
-Project created by **Neil Sable**.
+Project created by 
+**Neil Sable**.
