@@ -1,36 +1,92 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SAP BTP Ops Copilot
 
-## Getting Started
+SAP BTP Ops Copilot is a local-first MVP that converts SAP BTP-style platform logs into a decision-grade incident brief.
 
-First, run the development server:
+This project demonstrates how raw operational telemetry can be transformed into executive-ready insights for faster incident response and governance.
 
-```bash
+---
+
+## Objectives
+
+- Ingest SAP BTP-style logs and extract operational signals
+- Identify severity, confidence, and likely root cause
+- Generate executive-ready summaries and recommended actions
+- Enable fast copy/export for leadership communication
+- Remain fully free, local, and dependency-light
+
+---
+
+## What the Project Does
+
+### 1. Log Ingestion
+Parses log lines and extracts:
+- Errors, warnings, timeouts
+- HTTP 5xx responses
+- Error rate
+- Service and region hints
+
+### 2. Incident Analysis
+Generates:
+- Severity (Low / Medium / High)
+- Confidence level
+- Executive one-liner
+- Root cause hypothesis
+- Recommended actions
+- Business impact
+- SAP BTP-native next steps
+
+---
+
+## Architecture
+
+- Frontend: Next.js (App Router)
+- API Routes:
+  - /api/ingest
+  - /api/analyze
+- No external services
+- No paid APIs
+
+---
+
+## How to Run Locally
+
+Install dependencies:
+npm install
+
+powershell
+Copy code
+
+Start the app:
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+r
+Copy code
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Open in browser:
+http://localhost:3000
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+yaml
+Copy code
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## Demo Flow
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. Upload a log file or paste log text
+2. Logs are ingested and parsed
+3. Click Generate
+4. View executive-ready incident brief
+5. Copy or export for sharing
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+## Security Notice
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Do not upload sensitive production data.
+Remove secrets and PII before using logs.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+## Author
+
+Project created by **Neil Sable**.
