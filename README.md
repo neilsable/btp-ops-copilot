@@ -63,7 +63,7 @@ r
 Copy code
 
 Open in browser:
-http://localhost:3000
+btp-ops-copilot-x7px.vercel.app
 
 yaml
 Copy code
