@@ -2,6 +2,9 @@
 
 SAP BTP Ops Copilot is a local-first MVP that converts SAP BTP-style platform logs into a decision-grade incident brief.
 
+# 🔗 Important Links
+👉(https://https://btp-ops-copilot-x7px-4211z0abq-neilsables-projects.vercel.app/)
+
 This project demonstrates how raw operational telemetry can be transformed into executive-ready insights for faster incident response and governance.
 
 ---
