@@ -98,7 +98,6 @@ function toMarkdownBrief(params: {
 function severityTone(sev?: "Low" | "Medium" | "High") {
   if (sev === "High") {
     return {
-      ring: "ring-rose-500/25",
       border: "border-rose-500/25",
       badge: "border-rose-500/40 bg-rose-500/14 text-rose-100",
       glow: "shadow-[0_0_80px_rgba(244,63,94,0.12)]",
@@ -109,7 +108,6 @@ function severityTone(sev?: "Low" | "Medium" | "High") {
   }
   if (sev === "Medium") {
     return {
-      ring: "ring-amber-500/25",
       border: "border-amber-500/25",
       badge: "border-amber-500/40 bg-amber-500/14 text-amber-100",
       glow: "shadow-[0_0_80px_rgba(245,158,11,0.12)]",
@@ -119,7 +117,6 @@ function severityTone(sev?: "Low" | "Medium" | "High") {
     };
   }
   return {
-    ring: "ring-emerald-500/20",
     border: "border-sky-500/20",
     badge: "border-emerald-500/40 bg-emerald-500/14 text-emerald-100",
     glow: "shadow-[0_0_80px_rgba(16,185,129,0.10)]",
@@ -199,6 +196,10 @@ export default function Page() {
   const readyForAnalyze =
     !loadingAnalyze && !loadingIngest && telemetry.logs.length > 0;
 
+  // Step state for circles
+  const step1Done = telemetry.logs.length > 0 && !loadingIngest; // ingestion succeeded
+  const step2Done = !!analysis && !loadingAnalyze;
+
   async function ingestText(text: string) {
     const payload = (text ?? "").trim();
     if (!payload) {
@@ -252,7 +253,7 @@ export default function Page() {
 
   async function generate() {
     if (!telemetry.logs.length) {
-      setErrorMsg("Ingest must succeed first (no parsed log sample available).");
+      setErrorMsg("Upload + ingest must succeed first (no parsed log sample).");
       return;
     }
 
@@ -356,8 +357,10 @@ export default function Page() {
         <div className="absolute inset-0 opacity-[0.10] [mask-image:radial-gradient(ellipse_at_center,black_30%,transparent_70%)] bg-gradient-to-r from-sky-500/10 via-transparent to-blue-500/10" />
       </div>
 
-      {/* Global font reduction (~35%) */}
-      <div className="relative z-10" style={{ fontSize: "0.65em" }}>
+      {/* GLOBAL FONT SCALE:
+          Halve everything vs current: 0.50em (50%).
+          This is the single master knob. */}
+      <div className="relative z-10" style={{ fontSize: "0.50em" }}>
         {/* Title Frame */}
         <header className="px-10 pt-10">
           <div
@@ -370,6 +373,7 @@ export default function Page() {
             <div
               className={cn("h-[3px] w-full bg-gradient-to-r", tone.gradientBar)}
             />
+
             <div className="px-10 py-8 flex items-start justify-between gap-8">
               <div>
                 <div className="inline-flex items-center gap-3">
@@ -423,25 +427,15 @@ export default function Page() {
               </div>
             </div>
 
-            {analysis?.executiveOneLiner && (
-              <div className="px-10 pb-8">
-                <div
-                  className={cn(
-                    "rounded-[22px] border bg-gradient-to-br p-6",
-                    tone.border,
-                    "from-neutral-950/40 to-neutral-950/70",
-                    "shadow-[0_0_45px_rgba(56,189,248,0.08)]"
-                  )}
-                >
-                  <div className={cn("text-sm font-semibold tracking-wide", tone.label)}>
-                    Executive One-liner
-                  </div>
-                  <div className="mt-2 text-xl md:text-2xl font-semibold leading-relaxed text-neutral-100">
-                    {analysis.executiveOneLiner}
-                  </div>
-                </div>
-              </div>
-            )}
+            {/* Step indicator (circles) */}
+            <div className="px-10 pb-8">
+              <StepRail
+                step1Done={step1Done}
+                step2Done={step2Done}
+                loadingIngest={loadingIngest}
+                loadingAnalyze={loadingAnalyze}
+              />
+            </div>
           </div>
         </header>
 
@@ -828,10 +822,10 @@ export default function Page() {
           </div>
         )}
 
-        {/* Fixed Signature — bottom-right, glass + neon glow */}
+        {/* Fixed Signature — bottom-right */}
         <div className="fixed bottom-6 right-6 z-[60]">
-          {/* Reverse the global 0.65em shrink for this badge so it stays bold/visible */}
-          <div style={{ fontSize: "1.20em" }}>
+          {/* Slightly reverse the 0.50 scale so it stays readable */}
+          <div style={{ fontSize: "1.15em" }}>
             <div className="rounded-[26px] border border-sky-500/28 bg-neutral-950/70 backdrop-blur px-6 py-5 shadow-[0_0_80px_rgba(56,189,248,0.22)]">
               <div className="text-xs uppercase tracking-[0.30em] text-neutral-400">
                 Created by
@@ -852,6 +846,73 @@ export default function Page() {
 }
 
 /* -------------------------- UI Components ------------------------ */
+
+function StepRail(props: {
+  step1Done: boolean;
+  step2Done: boolean;
+  loadingIngest: boolean;
+  loadingAnalyze: boolean;
+}) {
+  const { step1Done, step2Done, loadingIngest, loadingAnalyze } = props;
+
+  return (
+    <div className="rounded-[22px] border border-sky-500/14 bg-neutral-950/55 backdrop-blur p-5">
+      <div className="text-sm font-semibold text-neutral-200">
+        Operator flow
+      </div>
+      <div className="mt-4 flex items-center gap-4">
+        <StepDot
+          n={1}
+          label={loadingIngest ? "Uploading / ingesting…" : "Upload logs"}
+          state={step1Done ? "done" : loadingIngest ? "active" : "todo"}
+        />
+        <div className="h-[2px] flex-1 rounded bg-gradient-to-r from-sky-500/35 via-sky-500/10 to-transparent" />
+        <StepDot
+          n={2}
+          label={loadingAnalyze ? "Generating…" : "Generate brief"}
+          state={
+            step2Done ? "done" : loadingAnalyze ? "active" : step1Done ? "todo" : "locked"
+          }
+        />
+      </div>
+
+      <div className="mt-3 text-xs text-neutral-500">
+        Step 1 must succeed before Step 2 unlocks.
+      </div>
+    </div>
+  );
+}
+
+function StepDot(props: {
+  n: number;
+  label: string;
+  state: "todo" | "active" | "done" | "locked";
+}) {
+  const { n, label, state } = props;
+
+  const styles =
+    state === "done"
+      ? "border-emerald-500/40 bg-emerald-500/12 text-emerald-100 shadow-[0_0_30px_rgba(16,185,129,0.18)]"
+      : state === "active"
+      ? "border-sky-500/45 bg-sky-500/14 text-sky-100 shadow-[0_0_34px_rgba(56,189,248,0.20)]"
+      : state === "locked"
+      ? "border-neutral-800 bg-neutral-950/55 text-neutral-500"
+      : "border-neutral-700 bg-neutral-950/55 text-neutral-200";
+
+  return (
+    <div className="flex items-center gap-3">
+      <div
+        className={cn(
+          "h-10 w-10 rounded-full border flex items-center justify-center font-semibold",
+          styles
+        )}
+      >
+        {state === "done" ? "✓" : n}
+      </div>
+      <div className="text-sm font-semibold text-neutral-200">{label}</div>
+    </div>
+  );
+}
 
 function Metric({ label, value }: { label: string; value: string }) {
   return (
