@@ -46,6 +46,10 @@ Generates:
 - No external services
 - No paid APIs
 
+## Architecture
+
+![SAP BTP Ops Copilot Architecture](docs/architecture.png)
+
 ---
 
 ## How to Run Locally
