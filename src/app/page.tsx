@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 
 /* ----------------------------- Types ----------------------------- */
 type Telemetry = {
@@ -143,7 +143,6 @@ function getNum(v: unknown) {
 }
 
 function signalTone(key: string, val: number) {
-  // severity-ish highlights for important signals
   const k = key.toLowerCase();
   if (val <= 0) return "border-neutral-800 bg-neutral-950/65";
 
@@ -174,13 +173,11 @@ export default function Page() {
     logs: [],
   });
 
-  // Raw text and file handling
   const [rawText, setRawText] = useState<string>("");
   const [fileName, setFileName] = useState<string>("");
   const [fileBytes, setFileBytes] = useState<number>(0);
   const fileRef = useRef<HTMLInputElement | null>(null);
 
-  // State machine
   const [loadingIngest, setLoadingIngest] = useState(false);
   const [loadingAnalyze, setLoadingAnalyze] = useState(false);
   const [analysis, setAnalysis] = useState<AnalyzeResponse["output"] | null>(
@@ -188,7 +185,6 @@ export default function Page() {
   );
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  // Export modal
   const [exportOpen, setExportOpen] = useState(false);
   const [copied, setCopied] = useState(false);
 
@@ -348,473 +344,509 @@ export default function Page() {
     <main className="min-h-screen w-full bg-neutral-950 text-neutral-100">
       {/* Background */}
       <div className="pointer-events-none fixed inset-0">
-        <div className={cn("absolute -top-64 -right-64 h-[860px] w-[860px] rounded-full blur-3xl", tone.orb)} />
+        <div
+          className={cn(
+            "absolute -top-64 -right-64 h-[860px] w-[860px] rounded-full blur-3xl",
+            tone.orb
+          )}
+        />
         <div className="absolute -bottom-64 -left-64 h-[860px] w-[860px] rounded-full bg-blue-500/10 blur-3xl" />
         <div className="absolute inset-0 bg-gradient-to-b from-neutral-950 via-neutral-950 to-neutral-900/45" />
         <div className="absolute inset-0 opacity-[0.06] [background-image:radial-gradient(circle_at_1px_1px,rgba(56,189,248,0.35)_1px,transparent_0)] [background-size:26px_26px]" />
         <div className="absolute inset-0 opacity-[0.10] [mask-image:radial-gradient(ellipse_at_center,black_30%,transparent_70%)] bg-gradient-to-r from-sky-500/10 via-transparent to-blue-500/10" />
       </div>
 
-      {/* Title Frame */}
-      <header className="relative z-10 px-10 pt-10">
-        <div
-          className={cn(
-            "rounded-[28px] border bg-neutral-950/55 backdrop-blur overflow-hidden",
-            tone.border,
-            tone.glow
-          )}
-        >
-          <div className={cn("h-[3px] w-full bg-gradient-to-r", tone.gradientBar)} />
-          <div className="px-10 py-8 flex items-start justify-between gap-8">
-            <div>
-              <div className="inline-flex items-center gap-3">
-                <span className="h-3 w-3 rounded-full bg-sky-400 shadow-[0_0_20px_rgba(56,189,248,0.35)]" />
-                <span className="text-sm font-semibold tracking-wide text-neutral-300">
-                  SAP BTP Operations
-                </span>
+      {/* Global font reduction (~35%) */}
+      <div className="relative z-10" style={{ fontSize: "0.65em" }}>
+        {/* Title Frame */}
+        <header className="px-10 pt-10">
+          <div
+            className={cn(
+              "rounded-[28px] border bg-neutral-950/55 backdrop-blur overflow-hidden",
+              tone.border,
+              tone.glow
+            )}
+          >
+            <div
+              className={cn("h-[3px] w-full bg-gradient-to-r", tone.gradientBar)}
+            />
+            <div className="px-10 py-8 flex items-start justify-between gap-8">
+              <div>
+                <div className="inline-flex items-center gap-3">
+                  <span className="h-3 w-3 rounded-full bg-sky-400 shadow-[0_0_20px_rgba(56,189,248,0.35)]" />
+                  <span className="text-sm font-semibold tracking-wide text-neutral-300">
+                    SAP BTP Operations
+                  </span>
+                </div>
+                <h1 className="mt-2 text-5xl md:text-6xl font-semibold tracking-tight leading-[1.05]">
+                  SAP BTP Ops Copilot
+                </h1>
+                <p className="mt-3 text-xl md:text-2xl text-neutral-300 max-w-4xl leading-relaxed">
+                  Decision-grade incident briefs from platform telemetry — built
+                  for operator speed and executive clarity.
+                </p>
               </div>
-              <h1 className="mt-2 text-5xl md:text-6xl font-semibold tracking-tight leading-[1.05]">
-                SAP BTP Ops Copilot
-              </h1>
-              <p className="mt-3 text-xl md:text-2xl text-neutral-300 max-w-4xl leading-relaxed">
-                Decision-grade incident briefs from platform telemetry — built
-                for operator speed and executive clarity.
-              </p>
-            </div>
 
-            <div className="flex flex-col items-end gap-3 pt-1">
-              <div className="flex items-center gap-3">
-                <span
-                  className={cn(
-                    "rounded-full border px-4 py-2 text-sm font-semibold",
-                    analysis?.severity ? tone.badge : "border-neutral-800 bg-neutral-950/60 text-neutral-200"
-                  )}
-                >
-                  Severity: {analysis?.severity ?? "—"}
-                </span>
-
-                {analysis?.confidence && (
+              <div className="flex flex-col items-end gap-3 pt-1">
+                <div className="flex items-center gap-3">
                   <span
                     className={cn(
                       "rounded-full border px-4 py-2 text-sm font-semibold",
-                      confidenceBadge(analysis.confidence)
+                      analysis?.severity
+                        ? tone.badge
+                        : "border-neutral-800 bg-neutral-950/60 text-neutral-200"
                     )}
                   >
-                    Confidence: {analysis.confidence}
+                    Severity: {analysis?.severity ?? "—"}
                   </span>
-                )}
-              </div>
 
-              <div className="flex items-center gap-3">
-                <span className="rounded-full border border-neutral-800 bg-neutral-950/60 text-neutral-200 px-4 py-2 text-sm font-semibold">
-                  {telemetry.region}
-                </span>
-                <span className="rounded-full border border-neutral-800 bg-neutral-950/60 text-neutral-200 px-4 py-2 text-sm font-semibold">
-                  {telemetry.service}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {analysis?.executiveOneLiner && (
-            <div className="px-10 pb-8">
-              <div
-                className={cn(
-                  "rounded-[22px] border bg-gradient-to-br p-6",
-                  tone.border,
-                  "from-neutral-950/40 to-neutral-950/70",
-                  "shadow-[0_0_45px_rgba(56,189,248,0.08)]"
-                )}
-              >
-                <div className={cn("text-sm font-semibold tracking-wide", tone.label)}>
-                  Executive One-liner
-                </div>
-                <div className="mt-2 text-xl md:text-2xl font-semibold leading-relaxed text-neutral-100">
-                  {analysis.executiveOneLiner}
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-      </header>
-
-      {/* Body */}
-      <div className="relative z-10 px-10 py-10">
-        <div className="grid gap-10 xl:grid-cols-12 min-h-[72vh]">
-          {/* Left: Ingest */}
-          <section className="xl:col-span-5 rounded-[28px] border border-neutral-800/80 bg-neutral-950/45 backdrop-blur p-8 shadow-[0_18px_70px_rgba(0,0,0,0.6)]">
-            <div className="flex items-start justify-between gap-6">
-              <div>
-                <h2 className="text-2xl font-semibold text-neutral-100">
-                  Ingest Real Logs
-                </h2>
-                <p className="mt-2 text-base text-neutral-400">
-                  Upload a .log/.txt/.csv/.json file or paste log lines. Upload
-                  auto-ingests so Generate is unlocked immediately.
-                </p>
-              </div>
-              <div className="rounded-2xl border border-neutral-800 bg-neutral-950/60 px-4 py-3">
-                <div className="text-xs text-neutral-500">Status</div>
-                <div className="mt-1 text-sm font-semibold text-neutral-200">
-                  {loadingIngest
-                    ? "Ingesting…"
-                    : telemetry.logs.length > 0
-                      ? "Ready"
-                      : "Awaiting logs"}
-                </div>
-              </div>
-            </div>
-
-            {/* File input */}
-            <div className="mt-6 flex items-center gap-3">
-              <input
-                ref={fileRef}
-                type="file"
-                accept=".txt,.log,.json,.csv"
-                className="hidden"
-                onChange={async () => {
-                  const input = fileRef.current;
-                  const file = input?.files?.[0];
-                  if (!file) return;
-
-                  const text = await file.text();
-
-                  setRawText(text);
-                  setFileName(file.name);
-                  setFileBytes(file.size);
-                  setErrorMsg(null);
-                  setAnalysis(null);
-
-                  if (fileRef.current) fileRef.current.value = "";
-
-                  await ingestText(text);
-                }}
-              />
-
-              <button
-                className="rounded-2xl border border-neutral-800 bg-neutral-950/40 px-5 py-3 text-lg font-semibold text-neutral-200 hover:bg-neutral-950/60 focus:outline-none focus:ring-2 focus:ring-neutral-600/40"
-                onClick={() => fileRef.current?.click()}
-              >
-                Upload File
-              </button>
-
-              <button
-                className={cn(
-                  "rounded-2xl border px-5 py-3 text-lg font-semibold focus:outline-none focus:ring-2 shadow-[0_0_30px_rgba(56,189,248,0.18)]",
-                  !readyForIngest
-                    ? "border-neutral-700 bg-neutral-900/40 text-neutral-300 cursor-not-allowed"
-                    : "border-sky-500/30 bg-sky-500/14 text-sky-100 hover:bg-sky-500/18 focus:ring-sky-500/40"
-                )}
-                onClick={ingestLogs}
-                disabled={!readyForIngest}
-              >
-                {loadingIngest ? "Ingesting…" : "Ingest Logs"}
-              </button>
-
-              <button
-                className={cn(
-                  "rounded-2xl border border-neutral-800 bg-neutral-950/40 px-5 py-3 text-lg font-semibold text-neutral-200 hover:bg-neutral-950/60 focus:outline-none focus:ring-2 focus:ring-neutral-600/40",
-                  (loadingIngest || loadingAnalyze) &&
-                    "opacity-60 cursor-not-allowed"
-                )}
-                onClick={clearAll}
-                disabled={loadingIngest || loadingAnalyze}
-              >
-                Clear
-              </button>
-            </div>
-
-            {/* File + content indicators */}
-            <div className="mt-4 rounded-2xl border border-neutral-800 bg-neutral-950/60 p-4">
-              <div className="grid gap-2 md:grid-cols-3">
-                <div className="text-sm text-neutral-300">
-                  <span className="font-semibold text-neutral-100">File:</span>{" "}
-                  {fileName ? fileName : "—"}
-                </div>
-                <div className="text-sm text-neutral-300">
-                  <span className="font-semibold text-neutral-100">Size:</span>{" "}
-                  {fileName ? `${fileBytes} bytes` : "—"}
-                </div>
-                <div className="text-sm text-neutral-300">
-                  <span className="font-semibold text-neutral-100">
-                    Loaded chars:
-                  </span>{" "}
-                  {rawText.length}
-                </div>
-              </div>
-              <div className="mt-2 text-xs text-neutral-500">
-                If ingestion succeeds, “Sample lines parsed” below will be
-                greater than 0.
-              </div>
-            </div>
-
-            {/* Paste area */}
-            <div className="mt-6">
-              <textarea
-                value={rawText}
-                onChange={(e) => setRawText(e.target.value)}
-                placeholder="Paste log snippet here (recommended: 50–300 lines), then click Ingest Logs."
-                className="w-full h-[260px] rounded-2xl border border-neutral-800 bg-neutral-950/70 p-5 text-sm text-neutral-200 font-mono leading-relaxed focus:outline-none focus:ring-2 focus:ring-sky-500/25"
-              />
-              <div className="mt-3 text-sm text-neutral-500">
-                Tip: remove secrets before pasting. Keep timestamps if possible.
-              </div>
-            </div>
-
-            {/* Parsed snapshot */}
-            <div className="mt-8">
-              <h3 className="text-xl font-semibold text-neutral-100 mb-4">
-                Parsed Telemetry Snapshot
-              </h3>
-
-              <div className="grid gap-4 md:grid-cols-2">
-                <Metric label="Service (guess)" value={telemetry.service} />
-                <Metric label="Region (guess)" value={telemetry.region} />
-              </div>
-
-              <div className="mt-6">
-                <h4 className="text-lg font-semibold text-neutral-100 mb-3">
-                  Derived Signals
-                </h4>
-                <div className="grid gap-4 sm:grid-cols-2">
-                  {Object.entries(telemetry.signals).map(([k, v]) => {
-                    const num = getNum(v);
-                    return (
-                      <Signal
-                        key={k}
-                        label={formatKey(k)}
-                        value={String(v)}
-                        className={signalTone(k, num)}
-                      />
-                    );
-                  })}
-                </div>
-              </div>
-
-              <div className="mt-6 rounded-2xl border border-neutral-800 bg-neutral-950/65 p-5">
-                <div className="text-sm font-semibold text-neutral-200">
-                  Sample lines parsed:{" "}
-                  <span className="font-semibold">{telemetry.logs.length}</span>
-                </div>
-                <div className="mt-2 text-xs text-neutral-500">
-                  Generate unlocks when this number is greater than 0.
-                </div>
-              </div>
-            </div>
-          </section>
-
-          {/* Right: Analysis */}
-          <section className="xl:col-span-7 rounded-[28px] border border-neutral-800/80 bg-neutral-950/45 backdrop-blur p-8 shadow-[0_18px_70px_rgba(0,0,0,0.6)]">
-            <div className="flex items-start justify-between gap-6">
-              <div>
-                <h2 className="text-2xl font-semibold text-neutral-100">
-                  Copilot Analysis
-                </h2>
-                <p className="mt-2 text-base text-neutral-400">
-                  Generate an executive-ready incident brief from ingested log
-                  patterns.
-                </p>
-              </div>
-
-              <div className="flex items-center gap-3">
-                <button
-                  className={cn(
-                    "rounded-2xl border px-5 py-3 text-lg font-semibold focus:outline-none focus:ring-2",
-                    !readyForAnalyze
-                      ? "border-neutral-700 bg-neutral-900/40 text-neutral-300 cursor-not-allowed"
-                      : cn(
-                          "border-sky-500/30 bg-sky-500/14 text-sky-100 hover:bg-sky-500/18 focus:ring-sky-500/40",
-                          "shadow-[0_0_34px_rgba(56,189,248,0.18)]"
-                        )
+                  {analysis?.confidence && (
+                    <span
+                      className={cn(
+                        "rounded-full border px-4 py-2 text-sm font-semibold",
+                        confidenceBadge(analysis.confidence)
+                      )}
+                    >
+                      Confidence: {analysis.confidence}
+                    </span>
                   )}
-                  onClick={generate}
-                  disabled={!readyForAnalyze}
-                >
-                  {loadingAnalyze ? "Generating…" : "Generate"}
-                </button>
+                </div>
 
-                <button
-                  className={cn(
-                    "rounded-2xl border border-neutral-800 bg-neutral-950/40 px-5 py-3 text-lg font-semibold text-neutral-200 hover:bg-neutral-950/60 focus:outline-none focus:ring-2 focus:ring-neutral-600/40",
-                    (!analysis || loadingAnalyze || loadingIngest) &&
-                      "opacity-60 cursor-not-allowed"
-                  )}
-                  onClick={copyExecutiveSummary}
-                  disabled={!analysis || loadingAnalyze || loadingIngest}
-                >
-                  {copied ? "Copied" : "Copy"}
-                </button>
-
-                <button
-                  className={cn(
-                    "rounded-2xl border border-neutral-800 bg-neutral-950/40 px-5 py-3 text-lg font-semibold text-neutral-200 hover:bg-neutral-950/60 focus:outline-none focus:ring-2 focus:ring-neutral-600/40",
-                    (!analysis || loadingAnalyze || loadingIngest) &&
-                      "opacity-60 cursor-not-allowed"
-                  )}
-                  onClick={() => setExportOpen(true)}
-                  disabled={!analysis || loadingAnalyze || loadingIngest}
-                >
-                  Export
-                </button>
+                <div className="flex items-center gap-3">
+                  <span className="rounded-full border border-neutral-800 bg-neutral-950/60 text-neutral-200 px-4 py-2 text-sm font-semibold">
+                    {telemetry.region}
+                  </span>
+                  <span className="rounded-full border border-neutral-800 bg-neutral-950/60 text-neutral-200 px-4 py-2 text-sm font-semibold">
+                    {telemetry.service}
+                  </span>
+                </div>
               </div>
             </div>
 
-            {errorMsg && (
-              <div className="mt-6 rounded-2xl border border-rose-500/30 bg-rose-500/10 p-5 text-base text-rose-100">
-                <div className="font-semibold">Action failed</div>
-                <div className="mt-2 text-rose-100/90">{errorMsg}</div>
+            {analysis?.executiveOneLiner && (
+              <div className="px-10 pb-8">
+                <div
+                  className={cn(
+                    "rounded-[22px] border bg-gradient-to-br p-6",
+                    tone.border,
+                    "from-neutral-950/40 to-neutral-950/70",
+                    "shadow-[0_0_45px_rgba(56,189,248,0.08)]"
+                  )}
+                >
+                  <div className={cn("text-sm font-semibold tracking-wide", tone.label)}>
+                    Executive One-liner
+                  </div>
+                  <div className="mt-2 text-xl md:text-2xl font-semibold leading-relaxed text-neutral-100">
+                    {analysis.executiveOneLiner}
+                  </div>
+                </div>
               </div>
             )}
+          </div>
+        </header>
 
-            <div className="mt-6 rounded-2xl border border-sky-500/14 bg-neutral-950/55 p-5">
-              <div className="text-sm font-semibold text-neutral-200">
-                Current Context
-              </div>
-              <div className="mt-3 text-base text-neutral-300">
-                <span className="font-semibold text-neutral-100">Scenario:</span>{" "}
-                {scenario}
-              </div>
-              <div className="mt-2 text-sm text-neutral-400">
-                Generate uses derived signals and parsed sample lines.
-              </div>
-            </div>
-
-            <div className="mt-8 grid gap-6 lg:grid-cols-2">
-              <Card title="Summary" accent tone={tone}>
-                {analysis?.summary ? (
-                  <p>{analysis.summary}</p>
-                ) : (
-                  <Placeholder
-                    title="Upload → auto-ingest → Generate."
-                    body="Once ingestion succeeds, Generate produces executive-grade output."
-                  />
-                )}
-              </Card>
-
-              <Card title="Likely Root Cause" tone={tone}>
-                {analysis?.rootCause ? (
-                  <p>{analysis.rootCause}</p>
-                ) : (
-                  <Placeholder
-                    title="Root-cause hypothesis appears here."
-                    body="Based on observed patterns: timeouts, 5xx, retries, saturation."
-                  />
-                )}
-              </Card>
-
-              <Card title="Recommended Actions" accent tone={tone}>
-                {analysis?.actions?.length ? (
-                  <ul className="list-disc pl-6 space-y-2">
-                    {analysis.actions.map((a) => (
-                      <li key={a}>{a}</li>
-                    ))}
-                  </ul>
-                ) : (
-                  <Placeholder
-                    title="Actions appear here."
-                    body="Immediate containment + short-term remediation + long-term governance."
-                  />
-                )}
-              </Card>
-
-              <Card title="Business Impact" tone={tone}>
-                {analysis?.businessImpact ? (
-                  <p>{analysis.businessImpact}</p>
-                ) : (
-                  <Placeholder
-                    title="Impact framing appears here."
-                    body="Explains risk in terms of SLA/SLO and customer experience."
-                  />
-                )}
-              </Card>
-            </div>
-
-            <div className="mt-8 grid gap-6 lg:grid-cols-2">
-              <Card title="Recent Logs (sample)" tone={tone}>
-                <div className="space-y-3">
-                  {(telemetry.logs?.length ? telemetry.logs : ["(No logs yet)"]).map(
-                    (l, i) => (
-                      <div
-                        key={i}
-                        className="rounded-2xl border border-neutral-800 bg-neutral-950/65 px-4 py-3 text-sm text-neutral-300 font-mono"
-                      >
-                        {l}
-                      </div>
-                    )
-                  )}
-                </div>
-              </Card>
-
-              <Card title="BTP-native Next Steps" accent tone={tone}>
-                {analysis?.btpNextSteps?.length ? (
-                  <ul className="list-disc pl-6 space-y-2">
-                    {analysis.btpNextSteps.map((s) => (
-                      <li key={s}>{s}</li>
-                    ))}
-                  </ul>
-                ) : (
-                  <Placeholder
-                    title="Operationalization steps appear here."
-                    body="SLOs, release correlation, runbooks, and cost guardrails."
-                  />
-                )}
-              </Card>
-            </div>
-          </section>
-        </div>
-
-        <footer className="mt-8 text-sm text-neutral-500">
-          Demo: logs → parsed signals → decision-grade brief (copy/export ready).
-        </footer>
-      </div>
-
-      {/* Export Modal */}
-      {exportOpen && analysis && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-8">
-          <div
-            className="absolute inset-0 bg-black/70"
-            onClick={() => setExportOpen(false)}
-          />
-          <div className="relative w-full max-w-4xl rounded-[28px] border border-neutral-800 bg-neutral-950 shadow-[0_20px_80px_rgba(0,0,0,0.8)] overflow-hidden">
-            <div className={cn("h-[3px] w-full bg-gradient-to-r", tone.gradientBar)} />
-            <div className="p-7">
-              <div className="flex items-start justify-between gap-4">
+        {/* Body */}
+        <div className="px-10 py-10">
+          <div className="grid gap-10 xl:grid-cols-12 min-h-[72vh]">
+            {/* Left: Ingest */}
+            <section className="xl:col-span-5 rounded-[28px] border border-neutral-800/80 bg-neutral-950/45 backdrop-blur p-8 shadow-[0_18px_70px_rgba(0,0,0,0.6)]">
+              <div className="flex items-start justify-between gap-6">
                 <div>
-                  <div className="text-2xl font-semibold text-neutral-100">
-                    Export Incident Brief
+                  <h2 className="text-2xl font-semibold text-neutral-100">
+                    Ingest Real Logs
+                  </h2>
+                  <p className="mt-2 text-base text-neutral-400">
+                    Upload a .log/.txt/.csv/.json file or paste log lines. Upload
+                    auto-ingests so Generate is unlocked immediately.
+                  </p>
+                </div>
+                <div className="rounded-2xl border border-neutral-800 bg-neutral-950/60 px-4 py-3">
+                  <div className="text-xs text-neutral-500">Status</div>
+                  <div className="mt-1 text-sm font-semibold text-neutral-200">
+                    {loadingIngest
+                      ? "Ingesting…"
+                      : telemetry.logs.length > 0
+                      ? "Ready"
+                      : "Awaiting logs"}
                   </div>
-                  <div className="mt-2 text-base text-neutral-400">
-                    Copy this Markdown into Slack, Confluence, Jira, or email.
+                </div>
+              </div>
+
+              {/* File input */}
+              <div className="mt-6 flex items-center gap-3">
+                <input
+                  ref={fileRef}
+                  type="file"
+                  accept=".txt,.log,.json,.csv"
+                  className="hidden"
+                  onChange={async () => {
+                    const input = fileRef.current;
+                    const file = input?.files?.[0];
+                    if (!file) return;
+
+                    const text = await file.text();
+
+                    setRawText(text);
+                    setFileName(file.name);
+                    setFileBytes(file.size);
+                    setErrorMsg(null);
+                    setAnalysis(null);
+
+                    if (fileRef.current) fileRef.current.value = "";
+
+                    await ingestText(text);
+                  }}
+                />
+
+                <button
+                  className="rounded-2xl border border-neutral-800 bg-neutral-950/40 px-5 py-3 text-lg font-semibold text-neutral-200 hover:bg-neutral-950/60 focus:outline-none focus:ring-2 focus:ring-neutral-600/40"
+                  onClick={() => fileRef.current?.click()}
+                >
+                  Upload File
+                </button>
+
+                <button
+                  className={cn(
+                    "rounded-2xl border px-5 py-3 text-lg font-semibold focus:outline-none focus:ring-2 shadow-[0_0_30px_rgba(56,189,248,0.18)]",
+                    !readyForIngest
+                      ? "border-neutral-700 bg-neutral-900/40 text-neutral-300 cursor-not-allowed"
+                      : "border-sky-500/30 bg-sky-500/14 text-sky-100 hover:bg-sky-500/18 focus:ring-sky-500/40"
+                  )}
+                  onClick={ingestLogs}
+                  disabled={!readyForIngest}
+                >
+                  {loadingIngest ? "Ingesting…" : "Ingest Logs"}
+                </button>
+
+                <button
+                  className={cn(
+                    "rounded-2xl border border-neutral-800 bg-neutral-950/40 px-5 py-3 text-lg font-semibold text-neutral-200 hover:bg-neutral-950/60 focus:outline-none focus:ring-2 focus:ring-neutral-600/40",
+                    (loadingIngest || loadingAnalyze) &&
+                      "opacity-60 cursor-not-allowed"
+                  )}
+                  onClick={clearAll}
+                  disabled={loadingIngest || loadingAnalyze}
+                >
+                  Clear
+                </button>
+              </div>
+
+              {/* File + content indicators */}
+              <div className="mt-4 rounded-2xl border border-neutral-800 bg-neutral-950/60 p-4">
+                <div className="grid gap-2 md:grid-cols-3">
+                  <div className="text-sm text-neutral-300">
+                    <span className="font-semibold text-neutral-100">File:</span>{" "}
+                    {fileName ? fileName : "—"}
                   </div>
+                  <div className="text-sm text-neutral-300">
+                    <span className="font-semibold text-neutral-100">Size:</span>{" "}
+                    {fileName ? `${fileBytes} bytes` : "—"}
+                  </div>
+                  <div className="text-sm text-neutral-300">
+                    <span className="font-semibold text-neutral-100">
+                      Loaded chars:
+                    </span>{" "}
+                    {rawText.length}
+                  </div>
+                </div>
+                <div className="mt-2 text-xs text-neutral-500">
+                  If ingestion succeeds, “Sample lines parsed” below will be
+                  greater than 0.
+                </div>
+              </div>
+
+              {/* Paste area */}
+              <div className="mt-6">
+                <textarea
+                  value={rawText}
+                  onChange={(e) => setRawText(e.target.value)}
+                  placeholder="Paste log snippet here (recommended: 50–300 lines), then click Ingest Logs."
+                  className="w-full h-[260px] rounded-2xl border border-neutral-800 bg-neutral-950/70 p-5 text-sm text-neutral-200 font-mono leading-relaxed focus:outline-none focus:ring-2 focus:ring-sky-500/25"
+                />
+                <div className="mt-3 text-sm text-neutral-500">
+                  Tip: remove secrets before pasting. Keep timestamps if possible.
+                </div>
+              </div>
+
+              {/* Parsed snapshot */}
+              <div className="mt-8">
+                <h3 className="text-xl font-semibold text-neutral-100 mb-4">
+                  Parsed Telemetry Snapshot
+                </h3>
+
+                <div className="grid gap-4 md:grid-cols-2">
+                  <Metric label="Service (guess)" value={telemetry.service} />
+                  <Metric label="Region (guess)" value={telemetry.region} />
+                </div>
+
+                <div className="mt-6">
+                  <h4 className="text-lg font-semibold text-neutral-100 mb-3">
+                    Derived Signals
+                  </h4>
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    {Object.entries(telemetry.signals).map(([k, v]) => {
+                      const num = getNum(v);
+                      return (
+                        <Signal
+                          key={k}
+                          label={formatKey(k)}
+                          value={String(v)}
+                          className={signalTone(k, num)}
+                        />
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div className="mt-6 rounded-2xl border border-neutral-800 bg-neutral-950/65 p-5">
+                  <div className="text-sm font-semibold text-neutral-200">
+                    Sample lines parsed:{" "}
+                    <span className="font-semibold">{telemetry.logs.length}</span>
+                  </div>
+                  <div className="mt-2 text-xs text-neutral-500">
+                    Generate unlocks when this number is greater than 0.
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* Right: Analysis */}
+            <section className="xl:col-span-7 rounded-[28px] border border-neutral-800/80 bg-neutral-950/45 backdrop-blur p-8 shadow-[0_18px_70px_rgba(0,0,0,0.6)]">
+              <div className="flex items-start justify-between gap-6">
+                <div>
+                  <h2 className="text-2xl font-semibold text-neutral-100">
+                    Copilot Analysis
+                  </h2>
+                  <p className="mt-2 text-base text-neutral-400">
+                    Generate an executive-ready incident brief from ingested log
+                    patterns.
+                  </p>
                 </div>
 
                 <div className="flex items-center gap-3">
                   <button
-                    className="rounded-2xl border border-sky-500/30 bg-sky-500/14 px-5 py-3 text-lg font-semibold text-sky-100 hover:bg-sky-500/18 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
-                    onClick={() => copyText(mdBrief)}
+                    className={cn(
+                      "rounded-2xl border px-5 py-3 text-lg font-semibold focus:outline-none focus:ring-2",
+                      !readyForAnalyze
+                        ? "border-neutral-700 bg-neutral-900/40 text-neutral-300 cursor-not-allowed"
+                        : cn(
+                            "border-sky-500/30 bg-sky-500/14 text-sky-100 hover:bg-sky-500/18 focus:ring-sky-500/40",
+                            "shadow-[0_0_34px_rgba(56,189,248,0.18)]"
+                          )
+                    )}
+                    onClick={generate}
+                    disabled={!readyForAnalyze}
                   >
-                    {copied ? "Copied" : "Copy Markdown"}
+                    {loadingAnalyze ? "Generating…" : "Generate"}
                   </button>
+
                   <button
-                    className="rounded-2xl border border-neutral-800 bg-neutral-950/40 px-5 py-3 text-lg font-semibold text-neutral-200 hover:bg-neutral-950/60 focus:outline-none focus:ring-2 focus:ring-neutral-600/40"
-                    onClick={() => setExportOpen(false)}
+                    className={cn(
+                      "rounded-2xl border border-neutral-800 bg-neutral-950/40 px-5 py-3 text-lg font-semibold text-neutral-200 hover:bg-neutral-950/60 focus:outline-none focus:ring-2 focus:ring-neutral-600/40",
+                      (!analysis || loadingAnalyze || loadingIngest) &&
+                        "opacity-60 cursor-not-allowed"
+                    )}
+                    onClick={copyExecutiveSummary}
+                    disabled={!analysis || loadingAnalyze || loadingIngest}
                   >
-                    Close
+                    {copied ? "Copied" : "Copy"}
+                  </button>
+
+                  <button
+                    className={cn(
+                      "rounded-2xl border border-neutral-800 bg-neutral-950/40 px-5 py-3 text-lg font-semibold text-neutral-200 hover:bg-neutral-950/60 focus:outline-none focus:ring-2 focus:ring-neutral-600/40",
+                      (!analysis || loadingAnalyze || loadingIngest) &&
+                        "opacity-60 cursor-not-allowed"
+                    )}
+                    onClick={() => setExportOpen(true)}
+                    disabled={!analysis || loadingAnalyze || loadingIngest}
+                  >
+                    Export
                   </button>
                 </div>
               </div>
 
-              <div className="mt-6">
-                <textarea
-                  readOnly
-                  value={mdBrief}
-                  className="w-full h-[420px] rounded-2xl border border-neutral-800 bg-neutral-950/70 p-5 text-sm text-neutral-200 font-mono leading-relaxed focus:outline-none"
-                />
+              {errorMsg && (
+                <div className="mt-6 rounded-2xl border border-rose-500/30 bg-rose-500/10 p-5 text-base text-rose-100">
+                  <div className="font-semibold">Action failed</div>
+                  <div className="mt-2 text-rose-100/90">{errorMsg}</div>
+                </div>
+              )}
+
+              <div className="mt-6 rounded-2xl border border-sky-500/14 bg-neutral-950/55 p-5">
+                <div className="text-sm font-semibold text-neutral-200">
+                  Current Context
+                </div>
+                <div className="mt-3 text-base text-neutral-300">
+                  <span className="font-semibold text-neutral-100">Scenario:</span>{" "}
+                  {scenario}
+                </div>
+                <div className="mt-2 text-sm text-neutral-400">
+                  Generate uses derived signals and parsed sample lines.
+                </div>
+              </div>
+
+              <div className="mt-8 grid gap-6 lg:grid-cols-2">
+                <Card title="Summary" accent tone={tone}>
+                  {analysis?.summary ? (
+                    <p>{analysis.summary}</p>
+                  ) : (
+                    <Placeholder
+                      title="Upload → auto-ingest → Generate."
+                      body="Once ingestion succeeds, Generate produces executive-grade output."
+                    />
+                  )}
+                </Card>
+
+                <Card title="Likely Root Cause" tone={tone}>
+                  {analysis?.rootCause ? (
+                    <p>{analysis.rootCause}</p>
+                  ) : (
+                    <Placeholder
+                      title="Root-cause hypothesis appears here."
+                      body="Based on observed patterns: timeouts, 5xx, retries, saturation."
+                    />
+                  )}
+                </Card>
+
+                <Card title="Recommended Actions" accent tone={tone}>
+                  {analysis?.actions?.length ? (
+                    <ul className="list-disc pl-6 space-y-2">
+                      {analysis.actions.map((a) => (
+                        <li key={a}>{a}</li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <Placeholder
+                      title="Actions appear here."
+                      body="Immediate containment + short-term remediation + long-term governance."
+                    />
+                  )}
+                </Card>
+
+                <Card title="Business Impact" tone={tone}>
+                  {analysis?.businessImpact ? (
+                    <p>{analysis.businessImpact}</p>
+                  ) : (
+                    <Placeholder
+                      title="Impact framing appears here."
+                      body="Explains risk in terms of SLA/SLO and customer experience."
+                    />
+                  )}
+                </Card>
+              </div>
+
+              <div className="mt-8 grid gap-6 lg:grid-cols-2">
+                <Card title="Recent Logs (sample)" tone={tone}>
+                  <div className="space-y-3">
+                    {(telemetry.logs?.length ? telemetry.logs : ["(No logs yet)"]).map(
+                      (l, i) => (
+                        <div
+                          key={i}
+                          className="rounded-2xl border border-neutral-800 bg-neutral-950/65 px-4 py-3 text-sm text-neutral-300 font-mono"
+                        >
+                          {l}
+                        </div>
+                      )
+                    )}
+                  </div>
+                </Card>
+
+                <Card title="BTP-native Next Steps" accent tone={tone}>
+                  {analysis?.btpNextSteps?.length ? (
+                    <ul className="list-disc pl-6 space-y-2">
+                      {analysis.btpNextSteps.map((s) => (
+                        <li key={s}>{s}</li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <Placeholder
+                      title="Operationalization steps appear here."
+                      body="SLOs, release correlation, runbooks, and cost guardrails."
+                    />
+                  )}
+                </Card>
+              </div>
+            </section>
+          </div>
+
+          <footer className="mt-8 text-sm text-neutral-500">
+            Demo: logs → parsed signals → decision-grade brief (copy/export ready).
+          </footer>
+        </div>
+
+        {/* Export Modal */}
+        {exportOpen && analysis && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-8">
+            <div
+              className="absolute inset-0 bg-black/70"
+              onClick={() => setExportOpen(false)}
+            />
+            <div className="relative w-full max-w-4xl rounded-[28px] border border-neutral-800 bg-neutral-950 shadow-[0_20px_80px_rgba(0,0,0,0.8)] overflow-hidden">
+              <div
+                className={cn(
+                  "h-[3px] w-full bg-gradient-to-r",
+                  tone.gradientBar
+                )}
+              />
+              <div className="p-7">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <div className="text-2xl font-semibold text-neutral-100">
+                      Export Incident Brief
+                    </div>
+                    <div className="mt-2 text-base text-neutral-400">
+                      Copy this Markdown into Slack, Confluence, Jira, or email.
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <button
+                      className="rounded-2xl border border-sky-500/30 bg-sky-500/14 px-5 py-3 text-lg font-semibold text-sky-100 hover:bg-sky-500/18 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+                      onClick={() => copyText(mdBrief)}
+                    >
+                      {copied ? "Copied" : "Copy Markdown"}
+                    </button>
+                    <button
+                      className="rounded-2xl border border-neutral-800 bg-neutral-950/40 px-5 py-3 text-lg font-semibold text-neutral-200 hover:bg-neutral-950/60 focus:outline-none focus:ring-2 focus:ring-neutral-600/40"
+                      onClick={() => setExportOpen(false)}
+                    >
+                      Close
+                    </button>
+                  </div>
+                </div>
+
+                <div className="mt-6">
+                  <textarea
+                    readOnly
+                    value={mdBrief}
+                    className="w-full h-[420px] rounded-2xl border border-neutral-800 bg-neutral-950/70 p-5 text-sm text-neutral-200 font-mono leading-relaxed focus:outline-none"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Fixed Signature — bottom-right, glass + neon glow */}
+        <div className="fixed bottom-6 right-6 z-[60]">
+          {/* Reverse the global 0.65em shrink for this badge so it stays bold/visible */}
+          <div style={{ fontSize: "1.20em" }}>
+            <div className="rounded-[26px] border border-sky-500/28 bg-neutral-950/70 backdrop-blur px-6 py-5 shadow-[0_0_80px_rgba(56,189,248,0.22)]">
+              <div className="text-xs uppercase tracking-[0.30em] text-neutral-400">
+                Created by
+              </div>
+              <div className="mt-2 text-2xl font-semibold tracking-tight text-neutral-100">
+                Neil Sable
+              </div>
+              <div className="mt-3 flex items-center gap-3 text-sm font-semibold text-neutral-300">
+                <span className="inline-flex h-3 w-3 rounded-full bg-sky-400 shadow-[0_0_18px_rgba(56,189,248,0.55)]" />
+                London, UK
               </div>
             </div>
           </div>
         </div>
-      )}
+      </div>
     </main>
   );
 }
