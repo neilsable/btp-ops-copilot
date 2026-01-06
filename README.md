@@ -95,6 +95,15 @@ Remove secrets and PII before using logs.
 
 ---
 
+## Screenshots
+
+### Log Ingestion & Telemetry
+![Dashboard](docs/screenshots/dashboard.png)
+
+### Generated Incident Brief
+![Analysis](docs/screenshots/analysis.png)
+
+
 ## Author
 
 Project created by **Neil Sable**.
