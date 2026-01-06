@@ -82,10 +82,10 @@ Copy code
 ## Screenshots
 
 ### Log Ingestion & Telemetry
-![Dashboard](docs/screenshots/dashboard.png)
+![Dashboard](./docs:screenshots:dashboard.png)
 
 ### Generated Incident Brief
-![Analysis](docs/screenshots/analysis.png)
+![Analysis](./docs:screenshots:analysis.png)
 
 ---
 ## Security Notice
