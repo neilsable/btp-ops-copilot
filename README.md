@@ -79,7 +79,15 @@ Copy code
 5. Copy or export for sharing
 
 ---
+## Screenshots
 
+### Log Ingestion & Telemetry
+![Dashboard](docs/screenshots/dashboard.png)
+
+### Generated Incident Brief
+![Analysis](docs/screenshots/analysis.png)
+
+---
 ## Security Notice
 
 Do not upload sensitive production data.
