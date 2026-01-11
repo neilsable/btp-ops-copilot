@@ -1,102 +1,89 @@
-# SAP BTP Ops Copilot
+<div align="center">
 
-SAP BTP Ops Copilot is a local-first MVP that converts SAP BTP-style platform logs into a decision-grade incident brief.
+# 🤖 SAP BTP Ops Copilot  
+### From platform logs to decision-grade incident briefs
 
-# 🔗 Important Links
-👉https://btp-ops-copilot-x7px.vercel.app/
+<p align="center">
+  <a href="https://btp-ops-copilot-x7px.vercel.app/" target="_blank">
+    <img src="https://img.shields.io/badge/🚀%20Live%20Demo-Open%20Ops%20Copilot-0FAAFF?style=for-the-badge" />
+  </a>
+</p>
 
-This project demonstrates how raw operational telemetry can be transformed into executive-ready insights for faster incident response and governance.
+<p align="center">
+  <img src="https://img.shields.io/badge/SAP%20BTP-Inspired-blue" />
+  <img src="https://img.shields.io/badge/Operations-Analytics-success" />
+  <img src="https://img.shields.io/badge/Incident%20Response-Decision--Grade-orange" />
+  <img src="https://img.shields.io/badge/Local--First-No%20External%20APIs-black" />
+</p>
 
----
-
-## Objectives
-
-- Ingest SAP BTP-style logs and extract operational signals
-- Identify severity, confidence, and likely root cause
-- Generate executive-ready summaries and recommended actions
-- Enable fast copy/export for leadership communication
-- Remain fully free, local, and dependency-light
-
----
-
-## What the Project Does
-
-### 1. Log Ingestion
-Parses log lines and extracts:
-- Errors, warnings, timeouts
-- HTTP 5xx responses
-- Error rate
-- Service and region hints
-
-### 2. Incident Analysis
-Generates:
-- Severity (Low / Medium / High)
-- Confidence level
-- Executive one-liner
-- Root cause hypothesis
-- Recommended actions
-- Business impact
-- SAP BTP-native next steps
+</div>
 
 ---
 
-## Architecture
+## ✨ What is SAP BTP Ops Copilot?
 
-- Frontend: Next.js (App Router)
-- API Routes:
-  - /api/ingest
-  - /api/analyze
-- No external services
-- No paid APIs
+**SAP BTP Ops Copilot** is a **local-first MVP** that converts  
+**SAP BTP–style platform logs** into an **executive-ready incident brief**.
 
-## Architecture
+Instead of forcing engineers or consultants to manually interpret raw telemetry,  
+the Copilot transforms logs into **clear, leadership-friendly outputs**:
+- severity
+- confidence
+- root cause hypothesis
+- business impact
+- recommended next actions
 
-![SAP BTP Ops Copilot Architecture](docs/architecture.png)
-
----
-
-## How to Run Locally
-
-Install dependencies:
-npm install
-
-powershell
-Copy code
-
-Start the app:
-npm run dev
-
-Open in browser:
-btp-ops-copilot-x7px.vercel.app
+All in seconds.
 
 ---
 
-## Demo Flow
+## 🎯 Why this matters
 
-1. Upload a log file or paste log text
-2. Logs are ingested and parsed
-3. Click Generate
-4. View executive-ready incident brief
-5. Copy or export for sharing
+Operational logs are:
+- noisy
+- technical
+- fragmented across services
 
----
-## Screenshots
+Executives, however, need:
+> **clarity, confidence, and next steps — not raw logs.**
 
-### Log Ingestion & Telemetry
-![Dashboard](./docs:screenshots:dashboard.png)
-
-### Generated Incident Brief
-![Analysis](./docs:screenshots:analysis.png)
-
----
-## Security Notice
-
-Do not upload sensitive production data.
-Remove secrets and PII before using logs.
+SAP BTP Ops Copilot bridges that gap by automating the **translation layer** between
+platform telemetry and decision-making.
 
 ---
 
-## Author
+## 🧠 What the Copilot does
 
-Project created by 
-**Neil Sable**.
+### 1️⃣ Log Ingestion
+Parses SAP BTP–style logs and extracts operational signals such as:
+- errors, warnings, and timeouts
+- HTTP 5xx patterns
+- error rate signals
+- service and region hints
+
+---
+
+### 2️⃣ Incident Analysis
+Generates a structured **incident brief**, including:
+- **Severity** (Low / Medium / High)
+- **Confidence level**
+- **Executive one-liner**
+- **Root cause hypothesis**
+- **Recommended actions**
+- **Business impact**
+- **SAP BTP-native next steps**
+
+The output is designed to be **copy-paste ready for leadership updates**.
+
+---
+
+## 🧩 Demo flow
+
+```text
+Paste or upload logs
+        ↓
+Log parsing & signal extraction
+        ↓
+Incident analysis
+        ↓
+Executive-ready incident brief
